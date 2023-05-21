@@ -1,3 +1,11 @@
-import * as compomerci from './compomerci';
+function compomerci(
+      componentName,
+      componentStyle,
+      createTest,
+      lazy,
+      story,
+      savePath,
+    );
+    
 
-export default compomerci;
+    module.exports = compomerci;

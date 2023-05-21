@@ -41,7 +41,7 @@ const savePath = readline.question(`Where would you like to save the component (
 const componentName = readline.question(`What would you like to name the component (default: ${componentNameDefault})?`) || componentNameDefault;
 
 // Create the component folder and files
-const createComponent = (
+const compomerci = (
   componentName,
   componentStyle,
   createTest,
@@ -203,5 +203,18 @@ if (story === 'Yes') {
 
 
 
-// Create the component
-createComponent(componentName, componentStyle, createTest, lazy, story, savePath);
+// Create the component folder and files
+
+compomerci(
+  componentName,
+  componentStyle,
+  createTest,
+  lazy,
+  story,
+  savePath,
+);
+
+console.log(chalk.green(`Component ${componentName} created successfully!`));
+console.log(chalk.green(`Component saved to ${savePath}/${componentName}`));
+
+
