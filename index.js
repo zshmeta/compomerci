@@ -1,2 +1,3 @@
+import * as compomerci from './compomerci';
 
-      export { default } from './compomaintenant';
+export default compomerci;
