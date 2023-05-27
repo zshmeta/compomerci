@@ -1,64 +1,79 @@
 #!/usr/bin/env node
 
-
 import fs from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 import readline from 'readline-sync';
+import chalk from 'chalk';
+
+
 
 const red = chalk.red;
 const green = chalk.green;
 const blue = chalk.blue;
 const yellow = chalk.yellow;
 
-// Ask the user what kind of compo they want to create
-const compoTypeOptions = [
-  'Page',
-  'Layout',
-  'Component'
-];
 
-const compoTypeIndex = readline.keyInSelect(compoTypeOptions.map(option => {
-  switch (option) {
-    case 'Page':
-      return red(option);
-    case 'Layout':
-      return green(option);
-    case 'Component':
-      return blue(option)
-    default:
-      return option;
-  }}), 'What kind of compo would you like to create?');
+const askQuestionWithOptions = (question, options) => {
+  console.log(question);
+  return readline.keyInSelect(options, '');
+};
+
+// Ask the user what kind of compo they want to create
+const compoTypeOptions = ['Page', 'Layout', 'Component'];
+
+const compoTypeIndex = askQuestionWithOptions(
+  `What kind of Components would you like to create?`,
+  compoTypeOptions.map((option) => {
+    const colorMap = { Page: red, Layout: green, Component: blue };
+    return colorMap[option](option);
+  })
+);
 const compoType = compoTypeOptions[compoTypeIndex];
 
-// Ask the user if they want to use a styled compo or a module.scss component
+
+
 const compoStyleOptions = [
   blue('Styled Compo'),
   green('Scss Compo'),
 ];
-const compoStyleIndex = readline.keyInSelect(compoStyleOptions, 'Would you like to use a styled compo or a module.scss compo?');
+
+const compoStyleIndex = askQuestionWithOptions(
+  `Would you like to use a styled ${compoType} or a module.scss ${compoType}?`,
+  compoStyleOptions
+);
 const compoStyle = compoStyleOptions[compoStyleIndex];
 
-// Ask the user if they want to create test units for their component
-const createTestOptions = [
-  blue('Yes'),red('No')
-];
-const createTestIndex = readline.keyInSelect(createTestOptions, 'Would you like to create test units for your compo?');
-const createTest = createTestOptions[createTestIndex];
 
-// Ask the user if they want a lazyjs file for their component
 const lazyOptions = [
   blue('Yes'),red('No')
 ];
-const lazyIndex = readline.keyInSelect(lazyOptions, 'Would you like to create a lazyjs file for your compo?');
+const lazyIndex = askQuestionWithOptions(
+  `Would you like to create a lazyjs file for your ${compoType}?`,
+  lazyOptions
+);
 const lazy = lazyOptions[lazyIndex];
 
-// Ask the user if they want a story file with their component
+
+
 const storyOptions = [
   blue('Yes'),red('No')
 ];
-const storyIndex = readline.keyInSelect(storyOptions, 'Would you like to create a story file for your compo?');
+const storyIndex = askQuestionWithOptions(
+  `Would you like to create a story file for your ${compoType}?`,
+  storyOptions
+);
 const story = storyOptions[storyIndex];
+
+
+
+const createTestOptions = [
+  blue('Yes'),red('No')
+];
+const createTestIndex = askQuestionWithOptions(
+  `Would you like to create test units for your ${compoType}?`,
+  createTestOptions
+);
+const createTest = createTestOptions[createTestIndex];
 
 // Set default savePath
 const savePathDefault = `./src/${compoType.toLowerCase()}s/`;
@@ -69,10 +84,10 @@ const compoNameDefault = `${componames[Math.floor(Math.random() * componames.len
 
 
 // Ask the user where they want to save the compo or use default
-const savePath = readline.question(`Where would you like to save the compo (default: ${savePathDefault})?`) || savePathDefault;
+const savePath = readline.question(`Where would you like to save the ${compoType} (default: ${savePathDefault})?`) || savePathDefault;
 
 // Ask the user for the name of the compo or use default
-const compoName = readline.question(`What would you like to name the compo (default: ${compoNameDefault})?`) || compoNameDefault;
+const compoName = readline.question(`What would you like to name the ${compoType} (default: ${compoNameDefault})?`) || compoNameDefault;
 
 // Create the compo folder and files
 const compomerci = (
@@ -107,7 +122,7 @@ const compomerci = (
     );
 
   // Create the compo CSS file
-  if (compoStyle) {
+  if (compoStyle === blue('Styled Compo')) {
     const compoCSS = `
 import styled from 'styled-compos';
 
@@ -137,7 +152,7 @@ export const ${compoName}Wrapper = styled.div\`
   }
 
   // Create the compo story file if (story) {
-if (story) {
+if (story === blue('Yes')) {
   const compoStory = `import React from 'react'; import ${compoName} from './${compoName}'; export default { title: '${compoName}', compo: ${compoName}, }; const Template = (args) => <${compoName} {...args} />; export const Basic = Template.bind({}); export const WithProps = Template.bind({}); WithProps.args = { text: 'Custom Text' };`;
   fs.writeFileSync(
     path.join(compoPath, `${compoName}.stories.js`),
@@ -146,7 +161,7 @@ if (story) {
 }
 
   // Create the compo test file if (createTest) {
-    if (createTest) {
+    if (createTest === blue('Yes')) {
         const compoTest = `
     import React from 'react';
     import { render, screen } from '@testing-library/react';
@@ -175,7 +190,7 @@ if (story) {
       }
 
   // Create the compo lazy file if (lazy) {
-    if (lazy) {
+    if (lazy === blue('Yes')) {
         const compoLazy = `
     import React, { lazy, Suspense } from 'react';
     
@@ -203,12 +218,13 @@ if (story) {
     
 
     // Create the compo README file
+    
     const compoReadmeTemplate = `
     # ${compoName}
     
     *by zshmeta*
     
-    **${compoName} - Some Fancy Random Name**
+    **${compoName}.README - A Quick Overview**
     
     ### What is this
     
@@ -234,7 +250,7 @@ if (story) {
         compoReadmeTemplate,
         );
     };
-
+  
 
 
 // Create the compo folder and files
@@ -248,7 +264,8 @@ compomerci(
   savePath,
 );
 
-console.log(chalk.green(`Compo ${compoName} created successfully!`));
-console.log(chalk.green(`Compo saved to ${savePath}/${compoName}`));
 
-
+    console.log(chalk.bgGreenBright('All done!'));
+    console.log(chalk.yellow(`${compoType} ${compoName} created successfully!`));
+    console.log(chalk.blue(`${compoType} saved to ${savePath}/${compoName}`));
+    console.log(chalk.redBright('Happy'), chalk.greenBright('Hacking!'));
