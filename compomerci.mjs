@@ -107,7 +107,7 @@ const compomerci = (
     );
 
   // Create the compo CSS file
-  if (compoStyle === 'Styled Compo') {
+  if (compoStyle) {
     const compoCSS = `
 import styled from 'styled-compos';
 
@@ -137,7 +137,7 @@ export const ${compoName}Wrapper = styled.div\`
   }
 
   // Create the compo story file if (story) {
-if (story === 'Yes') {
+if (story) {
   const compoStory = `import React from 'react'; import ${compoName} from './${compoName}'; export default { title: '${compoName}', compo: ${compoName}, }; const Template = (args) => <${compoName} {...args} />; export const Basic = Template.bind({}); export const WithProps = Template.bind({}); WithProps.args = { text: 'Custom Text' };`;
   fs.writeFileSync(
     path.join(compoPath, `${compoName}.stories.js`),
@@ -146,7 +146,7 @@ if (story === 'Yes') {
 }
 
   // Create the compo test file if (createTest) {
-    if (createTest === 'Yes') {
+    if (createTest) {
         const compoTest = `
     import React from 'react';
     import { render, screen } from '@testing-library/react';
@@ -175,7 +175,7 @@ if (story === 'Yes') {
       }
 
   // Create the compo lazy file if (lazy) {
-    if (lazy === 'Yes') {
+    if (lazy) {
         const compoLazy = `
     import React, { lazy, Suspense } from 'react';
     
