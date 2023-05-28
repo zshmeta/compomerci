@@ -153,7 +153,14 @@ export const ${compoName}Wrapper = styled.div\`
 
   // Create the compo story file if (story) {
 if (story === blue('Yes')) {
-  const compoStory = `import React from 'react'; import ${compoName} from './${compoName}'; export default { title: '${compoName}', compo: ${compoName}, }; const Template = (args) => <${compoName} {...args} />; export const Basic = Template.bind({}); export const WithProps = Template.bind({}); WithProps.args = { text: 'Custom Text' };`;
+  const compoStory = `
+  import React from 'react'; 
+  import ${compoName} from './${compoName}'; 
+  export default { title: '${compoName}', compo: ${compoName}, }; 
+  const Template = (args) => <${compoName} {...args} />; 
+  export const Basic = Template.bind({}); 
+  export const WithProps = Template.bind({}); 
+  WithProps.args = { text: 'Custom Text' };`;
   fs.writeFileSync(
     path.join(compoPath, `${compoName}.stories.js`),
     compoStory,
@@ -173,15 +180,13 @@ if (story === blue('Yes')) {
         const testText = 'Hello, World!';
         render(<${compoName} text={testText} />);
       
-        expect(screen.g)etByText(testText).toBeInTheDocument();
+        expect(screen.getByText(testText)).toBeInTheDocument();
       });
-)    
-     i('r'enders the compo withdefault text 'if none provided', () => {
-        render(<${compoName} />);
-        
-        expect(screen.getByText('Default Text')).toBeInTheDocument();
-      });
+      it('renders the compo with default text if none provided', () => {
+      render(<${compoName} />);
+      expect(screen.getByText('Default Text')).toBeInTheDocument();
     });
+  });
     `;
         fs.writeFileSync(
           path.join(compoPath, `${compoName}.test.js`),
