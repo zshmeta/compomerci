@@ -79,8 +79,8 @@ const createTest = createTestOptions[createTestIndex];
 const savePathDefault = `./src/${compoType.toLowerCase()}s/`;
 
 // Set default compoName
-const componames = ['Padfoot', 'Sirius', 'Dobby', 'Norbert', 'Pixie', 'Fleur', 'Ginny', 'Hagrid', 'Hedwig', 'Luna', 'Nimbus', 'Potter', 'Hermione', 'Dumbledore', 'Patronus', 'Tonks', 'Fleur', 'Lupin', 'Weasley', 'Malfoy', 'Albus', 'Myrtle', 'Remus', 'Looney', 'Aragog', 'Quirrell', 'Riddle'];
-const compoNameDefault = `${componames[Math.floor(Math.random() * componames.length)]}`;
+const componames = ['Azur','Indigo','Cyan','Teal','Lime','Amber','Purple','DeepPurple','Blue','LightBlue','DeepOrange','BlueGrey','Emerald','Topaze','Ruby','Saphir','Onyx','Opale','Perle','Diamant','Rubis','Saphir','Emeraude','Jade','Agate','Quartz','Granit','Marbre','Obsidienne','Lapis-lazuli','Malachite','Turquoise','Aigue-marine','Cristal','Ambre','Or','Argent','Bronze','Cuivre','Platine','Titane','Fer','Acier','Chrome','Nickel'];
+const compoNameDefault = `${componames[Math.floor(Math.random() * componames.length)]}${compoType}`;
 
 
 // Ask the user where they want to save the compo or use default
@@ -104,13 +104,13 @@ const compomerci = (
   // Create the compo JS file
   const compoJS = `
   import React from 'react';
-  ${compoStyle === "Styled Compo" ? `import { ${compoName}Wrapper } from './${compoName}.styled';` : `import styles from './${compoName}.module.scss';`}
+  ${compoStyle === blue('Styled Compo') ? `import { ${compoName}Wrapper } from './${compoName}.styled';` : `import styles from './${compoName}.module.scss';`}
   
   const ${compoName} = ({ text }) => {
     return (
-      <${compoStyle === "Styled Compo" ? `${compoName}Wrapper` : `div className={styles.${compoName}}`}>
+      <${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div className={styles.${compoName}}`}>
         {text || 'Default Text'}
-      </${compoStyle === "Styled Compo" ? `${compoName}Wrapper` : `div`}>
+      </${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div`}>
     );
   };
   
@@ -124,7 +124,7 @@ const compomerci = (
   // Create the compo CSS file
   if (compoStyle === blue('Styled Compo')) {
     const compoCSS = `
-import styled from 'styled-compos';
+import styled from 'styled-components';
 
 export const ${compoName}Wrapper = styled.div\`
   display: block;
@@ -272,5 +272,5 @@ compomerci(
 
     console.log(chalk.bgGreenBright('All done!'));
     console.log(chalk.yellow(`${compoType} ${compoName} created successfully!`));
-    console.log(chalk.blue(`${compoType} saved to ${savePath}/${compoName}`));
+    console.log(chalk.blue(`${compoType} saved to ${savePath}${compoName}`));
     console.log(chalk.redBright('Happy'), chalk.greenBright('Hacking!'));
