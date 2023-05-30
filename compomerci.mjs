@@ -19,17 +19,32 @@ const askQuestionWithOptions = (question, options) => {
 };
 
 // Ask the user what kind of compo they want to create
-const compoTypeOptions = ['Page', 'Layout', 'Component'];
+const compoTypeOptions = ['Component', 'Layout', 'Page'];
 
 const compoTypeIndex = askQuestionWithOptions(
   `What kind of Components would you like to create?`,
   compoTypeOptions.map((option) => {
-    const colorMap = { Page: red, Layout: green, Component: blue };
+    const colorMap = { Component: red, Layout: green, Page: blue };
     return colorMap[option](option);
   })
 );
+
+if (compoTypeIndex === -1 || compoTypeIndex === undefined) {
+  console.log('No compo type selected. Exiting...');
+  process.exit(0);
+}
+
 const compoType = compoTypeOptions[compoTypeIndex];
 
+const typeOptions = [
+  blue('Yes'), red('No'), green('None')
+];
+const typeIndex = askQuestionWithOptions(
+  `Would you like to include types for your ${compoType}? (Default: None)`,
+  typeOptions
+);
+
+const isTypeScript = typeOptions[typeIndex] === blue('Yes');
 
 
 const compoStyleOptions = [
@@ -37,11 +52,40 @@ const compoStyleOptions = [
   green('Scss Compo'),
 ];
 
+if (compoType === 'Page') {
+  compoStyleOptions.push(red('No Style'));
+}
+
+const elementOptions = [
+  'None',
+  'Button',
+  'Media',
+  'Text',
+  'Container',
+  'Custom'
+];
+
+const elementIndex = askQuestionWithOptions(
+  `Would you like to add an element to your ${compoType}?`,
+  elementOptions
+);
+
+const elementType = elementOptions[elementIndex];
+
+let customElementName = '';
+
+if (elementType === 'Custom') {
+  customElementName = askQuestion(`Please enter the name of the custom element:`);
+}
+
+
+
 const compoStyleIndex = askQuestionWithOptions(
   `Would you like to use a styled ${compoType} or a module.scss ${compoType}?`,
   compoStyleOptions
 );
 const compoStyle = compoStyleOptions[compoStyleIndex];
+
 
 
 const lazyOptions = [
@@ -55,6 +99,8 @@ const lazy = lazyOptions[lazyIndex];
 
 
 
+
+
 const storyOptions = [
   blue('Yes'),red('No')
 ];
@@ -63,6 +109,7 @@ const storyIndex = askQuestionWithOptions(
   storyOptions
 );
 const story = storyOptions[storyIndex];
+
 
 
 
@@ -103,24 +150,34 @@ const compomerci = (
 
   // Create the compo JS file
   const compoJS = `
- import React from 'react';
-${compoStyle === blue('Styled Compo') ? `import { ${compoName}Wrapper } from './${compoName}.styled';` : `import styles from './${compoName}.module.scss';`}
-
-const ${compoName}: React.FC<${compoName}Props> = ({ text, ...props }) => {
-  const handleClick = () => {
-    // Handle click events or other interactions here
+  import React, { useState } from 'react';
+  ${compoStyle === blue('Styled Compo') ? `import { ${compoName}Wrapper } from './${compoName}.styled';` : `import styles from './${compoName}.module.scss';`}
+  
+  ${isTypeScript ? `type ${compoName}Props = {
+    ${elementType !== 'None' ? `${elementType.toLowerCase()}?: ${elementType === 'Custom' ? customElementName : 'React.ReactNode'};` : ''}
+  };` : ''}
+  
+  const ${compoName}${isTypeScript ? `: React.FC<${compoName}Props>` : ''} = ({ ${elementType !== 'None' ? `${elementType.toLowerCase()},` : ''} ...props }) => {
+    const [count, setCount] = useState(0);
+  
+    const handleClick = () => {
+      // Handle click events or other interactions here
+      setCount(count + 1);
+    };
+  
+    return (
+      <${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div`} className={styles.${compoName}} {...props}>
+        ${elementType === 'Button' ? `<button onClick={handleClick}>{${elementType.toLowerCase()} || 'Default Button'}</button>` : ''}
+        ${elementType === 'Text' ? `<div>{${elementType.toLowerCase()} || 'Hello World'}</div>` : ''}
+        ${elementType === 'Media' ? `<img src={${elementType.toLowerCase()} || 'default-image.png'} alt="media" />` : ''}
+        ${elementType === 'Container' ? `<div className={styles.container}>{${elementType.toLowerCase()} || 'Default Container'}</div>` : ''}
+        ${elementType === 'Custom' ? `<${customElementName} {...${elementType.toLowerCase()}} />` : ''}
+        ${elementType === 'Button' ? `<div>Counter: {count}</div>` : ''}
+      </${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div`}>
+    );
   };
-
-  return (
-    <${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div`} className={styles.${compoName}} onClick={handleClick} {...props}>
-      {text || 'Default Text'}
-      {/* Add more JSX elements and features as needed */}
-    </${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div`}>
-  );
-};
-
-export default ${compoName};
   `;
+  
     fs.writeFileSync(
       path.join(compoPath, `${compoName}.jsx`),
       compoJS,
@@ -156,6 +213,9 @@ export const ${compoName}Wrapper = styled.div\`
     );
   }
 
+
+
+
   // Create the compo story file if (story) {
 if (story === blue('Yes')) {
   const compoStory = `
@@ -176,34 +236,60 @@ if (story === blue('Yes')) {
     if (createTest === blue('Yes')) {
         const compoTest = `
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, fireEvent, screen } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 import ${compoName} from './${compoName}';
 
 describe('${compoName}', () => {
-  it('renders default text when no text prop is provided', () => {
+  it('renders the compo with provided text', () => {
+    const testText = 'Hello, World!';
+    render(<${compoName} text={testText} />);
+
+    expect(screen.getByText(testText)).toBeInTheDocument();
+  });
+
+  it('renders the compo with default text if none provided', () => {
     render(<${compoName} />);
-    const defaultTextElement = screen.getByText('Default Text');
-    expect(defaultTextElement).toBeInTheDocument();
+    expect(screen.getByText('Default Text')).toBeInTheDocument();
   });
 
-  it('renders custom text when a text prop is provided', () => {
-    const customText = 'Custom Text';
-    render(<${compoName} text={customText} />);
-    const customTextElement = screen.getByText(customText);
-    expect(customTextElement).toBeInTheDocument();
+  test('renders without crashing', () => {
+    render(<${compoName} />);
   });
 
-  it('handles click events', () => {
-    const handleClick = jest.fn();
-    render(<${compoName} onClick={handleClick} />);
-    const componentElement = screen.getByText('Default Text');
-    userEvent.click(componentElement);
-    expect(handleClick).toHaveBeenCalledTimes(1);
-  });
-});
+  test('renders with initial props', () => {
+    const initialProps = {
+      // Add your initial props here
+    };
 
-    `;
+    render(<${compoName} {...initialProps} />);
+
+    // Add assertions to check if the component renders correctly with the initial props
+  });
+
+  test('interactions work as expected', () => {
+    render(<${compoName} />);
+
+    // Add fireEvent calls and assertions to test interactions
+  });
+
+  test('renders with different props', () => {
+    const newProps = {
+      // Add your new props here
+    };
+
+    render(<${compoName} {...newProps} />);
+
+    // Add assertions to check if the component renders correctly with the new props
+  });
+
+  test('snapshot testing', () => {
+    const { asFragment } = render(<${compoName} />);
+    expect(asFragment()).toMatchSnapshot();
+  });
+
+  // Add more tests for other scenarios and edge cases
+});`;
         fs.writeFileSync(
           path.join(compoPath, `${compoName}.test.js`),
           compoTest,
@@ -237,6 +323,9 @@ describe('${compoName}', () => {
       ${lazy === 'Yes' ? `export { default as ${compoName}Lazy } from './${compoName}.lazy'; `: ''}`;
       fs.writeFileSync(path.join(compoPath, 'index.js'),compoIndex,);
     
+
+
+
 
     // Create the compo README file
     
