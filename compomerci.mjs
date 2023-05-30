@@ -103,18 +103,23 @@ const compomerci = (
 
   // Create the compo JS file
   const compoJS = `
-  import React from 'react';
-  ${compoStyle === blue('Styled Compo') ? `import { ${compoName}Wrapper } from './${compoName}.styled';` : `import styles from './${compoName}.module.scss';`}
-  
-  const ${compoName} = ({ text }) => {
-    return (
-      <${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div className={styles.${compoName}}`}>
-        {text || 'Default Text'}
-      </${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div`}>
-    );
+ import React from 'react';
+${compoStyle === blue('Styled Compo') ? `import { ${compoName}Wrapper } from './${compoName}.styled';` : `import styles from './${compoName}.module.scss';`}
+
+const ${compoName}: React.FC<${compoName}Props> = ({ text, ...props }) => {
+  const handleClick = () => {
+    // Handle click events or other interactions here
   };
-  
-  export default ${compoName};
+
+  return (
+    <${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div`} className={styles.${compoName}} onClick={handleClick} {...props}>
+      {text || 'Default Text'}
+      {/* Add more JSX elements and features as needed */}
+    </${compoStyle === blue('Styled Compo') ? `${compoName}Wrapper` : `div`}>
+  );
+};
+
+export default ${compoName};
   `;
     fs.writeFileSync(
       path.join(compoPath, `${compoName}.jsx`),
@@ -170,23 +175,34 @@ if (story === blue('Yes')) {
   // Create the compo test file if (createTest) {
     if (createTest === blue('Yes')) {
         const compoTest = `
-    import React from 'react';
-    import { render, screen } from '@testing-library/react';
-    import '@testing-library/jest-dom/extend-expect';
-    import ${compoName} from './${compoName}';
-    
-    describe('${compoName}', () => {
-      it('renders the compo with provided text', () => {
-        const testText = 'Hello, World!';
-        render(<${compoName} text={testText} />);
-      
-        expect(screen.getByText(testText)).toBeInTheDocument();
-      });
-      it('renders the compo with default text if none provided', () => {
-      render(<${compoName} />);
-      expect(screen.getByText('Default Text')).toBeInTheDocument();
-    });
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import ${compoName} from './${compoName}';
+
+describe('${compoName}', () => {
+  it('renders default text when no text prop is provided', () => {
+    render(<${compoName} />);
+    const defaultTextElement = screen.getByText('Default Text');
+    expect(defaultTextElement).toBeInTheDocument();
   });
+
+  it('renders custom text when a text prop is provided', () => {
+    const customText = 'Custom Text';
+    render(<${compoName} text={customText} />);
+    const customTextElement = screen.getByText(customText);
+    expect(customTextElement).toBeInTheDocument();
+  });
+
+  it('handles click events', () => {
+    const handleClick = jest.fn();
+    render(<${compoName} onClick={handleClick} />);
+    const componentElement = screen.getByText('Default Text');
+    userEvent.click(componentElement);
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
+
     `;
         fs.writeFileSync(
           path.join(compoPath, `${compoName}.test.js`),
