@@ -208,7 +208,7 @@ export const ${compoName}Wrapper = styled.div\`
 }
 `;
     fs.writeFileSync(
-      path.join(compoPath, `${compoName}.module.scss`),
+      path.join(compoPath, `${compoName}.scoped.scss`),
       compoSCSS,
     );
   }
