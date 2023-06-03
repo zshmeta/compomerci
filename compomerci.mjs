@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline-sync';
 import chalk from 'chalk';
+import inquirer from 'inquirer';
 
 
 
@@ -11,130 +12,186 @@ const red = chalk.red;
 const green = chalk.green;
 const blue = chalk.blue;
 const yellow = chalk.yellow;
+const cyan = chalk.cyan;
 
 
-const askQuestionWithOptions = (question, options) => {
-  console.log(question);
-  return readline.keyInSelect(options, '');
+const askQuestionWithOptions = async (message, choices, allowCancel = true) => {
+  if (allowCancel) {
+    choices.push(red('Cancel'));
+  }
+  const { answer } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'answer',
+      message,
+      choices,
+    },
+  ]);
+
+  return choices.indexOf(answer);
 };
 
-// Ask the user what kind of compo they want to create
+// Questions to ask the user
 const compoTypeOptions = ['Component', 'Layout', 'Page'];
-
-const compoTypeIndex = askQuestionWithOptions(
-  `What kind of Components would you like to create?`,
-  compoTypeOptions.map((option) => {
-    const colorMap = { Component: red, Layout: green, Page: blue };
-    return colorMap[option](option);
-  })
-);
-
-if (compoTypeIndex === -1 || compoTypeIndex === undefined) {
-  console.log('No compo type selected. Exiting...');
-  process.exit(0);
-}
-
-const compoType = compoTypeOptions[compoTypeIndex];
-
-const typeOptions = [
-  blue('Yes'), red('No'), green('None')
-];
-const typeIndex = askQuestionWithOptions(
-  `Would you like to include types for your ${compoType}? (Default: None)`,
-  typeOptions
-);
-
-const isTypeScript = typeOptions[typeIndex] === blue('Yes');
-
-
-const compoStyleOptions = [
-  blue('Styled Compo'),
-  green('Scss Compo'),
-];
-
-if (compoType === 'Page') {
-  compoStyleOptions.push(red('No Style'));
-}
 
 const elementOptions = [
   'None',
-  'Button',
-  'Media',
-  'Text',
-  'Container',
-  'Custom'
+  blue('Button'),
+  yellow('Media'),
+  green('Text'),
+  cyan('Container'),
 ];
 
-const elementIndex = askQuestionWithOptions(
-  `Would you like to add an element to your ${compoType}?`,
-  elementOptions
-);
+const compoStyleOptions = [blue('Styled Compo'), green('Scss Compo')];
 
-const elementType = elementOptions[elementIndex];
+const typeOptions = [yellow('No'), blue('Yes')];
 
-let customElementName = '';
+const lazyOptions = [blue('Yes'), yellow('No')];
 
-if (elementType === 'Custom') {
-  customElementName = askQuestion(`Please enter the name of the custom element:`);
-}
+const storyOptions = [blue('Yes'), yellow('No')];
 
+const createTestOptions = [blue('Yes'), yellow('No')];
 
+// Main function to execute the script
+const main = async () => {
+  let createAnotherComponent = true;
+  while (createAnotherComponent) {
+  // Ask questions and store the answers
+  const compoTypeIndex = await askQuestionWithOptions(
+    `What kind of Components would you like to create?`,
+    compoTypeOptions.map((option) => {
+      const colorMap = { Component: yellow, Layout: green, Page: blue };
+      return colorMap[option](option);
+    })
+  );
 
-const compoStyleIndex = askQuestionWithOptions(
-  `Would you like to use a styled ${compoType} or a module.scss ${compoType}?`,
-  compoStyleOptions
-);
-const compoStyle = compoStyleOptions[compoStyleIndex];
+  const compoType = compoTypeOptions[compoTypeIndex];
 
+  const typeIndex = await askQuestionWithOptions(
+    `Would you like to include types for your ${compoType}? (Default: None)`,
+    typeOptions
+  );
 
+  const isTypeScript = typeOptions[typeIndex] === blue('Yes');
 
-const lazyOptions = [
-  blue('Yes'),red('No')
-];
-const lazyIndex = askQuestionWithOptions(
-  `Would you like to create a lazyjs file for your ${compoType}?`,
-  lazyOptions
-);
-const lazy = lazyOptions[lazyIndex];
+  if (compoType === 'Page') {
+    compoStyleOptions.push(yellow('No Style'));
+  }
 
+  const compoStyleIndex = await askQuestionWithOptions(
+    `Would you like to use a styled ${compoType} or a module.scss ${compoType}?`,
+    compoStyleOptions
+  );
+  const compoStyle = compoStyleOptions[compoStyleIndex];
 
+  const elementIndex = await askQuestionWithOptions(
+    `Would you like to add an element to your ${compoType}?`,
+    elementOptions
+  );
 
+  const elementType = elementOptions[elementIndex];
 
+  let customElementName = '';
 
-const storyOptions = [
-  blue('Yes'),red('No')
-];
-const storyIndex = askQuestionWithOptions(
-  `Would you like to create a story file for your ${compoType}?`,
-  storyOptions
-);
-const story = storyOptions[storyIndex];
+  if (elementType === 'Custom') {
+    const { customName } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'customName',
+        message: `Please enter the name of the custom element:`,
+      },
+    ]);
+    customElementName = customName;
+  }
 
+  const lazyIndex = await askQuestionWithOptions(
+    `Would you like to create a lazyjs file for your ${compoType}?`,
+    lazyOptions
+  );
+  const lazy = lazyOptions[lazyIndex];
 
+  const storyIndex = await askQuestionWithOptions(
+    `Would you like to create a story file for your ${compoType}?`,
+    storyOptions
+  );
+  const story = storyOptions[storyIndex];
 
+  const createTestIndex = await askQuestionWithOptions(
+    `Would you like to create test units for your ${compoType}?`,
+    createTestOptions
+  );
+  const createTest = createTestOptions[createTestIndex];
 
-const createTestOptions = [
-  blue('Yes'),red('No')
-];
-const createTestIndex = askQuestionWithOptions(
-  `Would you like to create test units for your ${compoType}?`,
-  createTestOptions
-);
-const createTest = createTestOptions[createTestIndex];
+  // Set default savePath
+  const savePathDefault = `./src/${compoType.toLowerCase()}s/`;
 
-// Set default savePath
-const savePathDefault = `./src/${compoType.toLowerCase()}s/`;
+  // Set default compoName
+  const componames = [
+    'Azur',
+    'Indigo',
+    'Cyan',
+    'Teal',
+    'Lime',
+    'Amber',
+    'Purple',
+    'DeepPurple',
+    'Blue',
+    'LightBlue',
+    'DeepOrange',
+    'BlueGrey',
+    'Emerald',
+    'Topaze',
+    'Ruby',
+    'Saphir',
+    'Onyx',
+    'Opale',
+    'Perle',
+    'Diamant',
+    'Rubis',
+    'Saphir',
+    'Emeraude',
+    'Jade',
+    'Agate',
+    'Quartz',
+    'Granit',
+    'Marbre',
+    'Obsidienne',
+    'Lapis-lazuli',
+    'Malachite',
+    'Turquoise',
+    'Aigue-marine',
+    'Cristal',
+    'Ambre',
+    'Or',
+    'Argent',
+    'Bronze',
+    'Cuivre',
+    'Platine',
+    'Titane',
+    'Fer',
+    'Acier',
+    'Chrome',
+    'Nickel',
+  ];
+  const compoNameDefault = `${
+    componames[Math.floor(Math.random() * componames.length)]
+  }${compoType}`;
 
-// Set default compoName
-const componames = ['Azur','Indigo','Cyan','Teal','Lime','Amber','Purple','DeepPurple','Blue','LightBlue','DeepOrange','BlueGrey','Emerald','Topaze','Ruby','Saphir','Onyx','Opale','Perle','Diamant','Rubis','Saphir','Emeraude','Jade','Agate','Quartz','Granit','Marbre','Obsidienne','Lapis-lazuli','Malachite','Turquoise','Aigue-marine','Cristal','Ambre','Or','Argent','Bronze','Cuivre','Platine','Titane','Fer','Acier','Chrome','Nickel'];
-const compoNameDefault = `${componames[Math.floor(Math.random() * componames.length)]}${compoType}`;
-
-
-// Ask the user where they want to save the compo or use default
-const savePath = readline.question(`Where would you like to save the ${compoType} (default: ${savePathDefault})?`) || savePathDefault;
-
-// Ask the user for the name of the compo or use default
-const compoName = readline.question(`What would you like to name the ${compoType} (default: ${compoNameDefault})?`) || compoNameDefault;
+  // Ask the user for the savePath and compoName
+  const { savePath, compoName } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'savePath',
+      message: `Where would you like to save the ${compoType} (default: ${savePathDefault})?`,
+      default: savePathDefault,
+    },
+    {
+      type: 'input',
+      name: 'compoName',
+      message: `What would you like to name the ${compoType} (default: ${compoNameDefault})?`,
+      default: compoNameDefault,
+    },
+  ]);
 
 // Create the compo folder and files
 const compomerci = (
@@ -221,6 +278,38 @@ if (story === blue('Yes')) {
   const compoStory = `
   import React from 'react'; 
   import ${compoName} from './${compoName}'; 
+  // components/atoms/${compoName}/index.stories.js
+  import React from 'react';
+  import { action } from '@storybook/addon-actions';
+  import { storiesOf } from '@storybook/react';
+  import { ${compoName} } from '../..';
+
+  storiesOf('atoms/${compoName}', module)
+    .add('default', () => (
+      <${compoName} onClick={action('clicked')}>
+      Default
+    </${compoName}>
+  ))
+  .add('outlined primary', () => (
+      <${compoName} variant="outlined" color="primary" onClick={action('clicked')}>
+      Outline Primary
+    </${compoName}>
+  ))
+  .add('contained secondary', () => (
+      <${compoName} variant="contained" color="secondary" onClick={action('clicked')}>
+      Contained Secondary
+    </${compoName}>
+  ))
+  .add('circle ${compoName}', () => (
+      <${compoName} variant="fab" color="primary" aria-label="Add" onClick={action('clicked')}>
+      CB
+    </${compoName}>
+  ))
+  .add('disabled ${compoName}', () => (
+      <${compoName} variant="contained" color="primary" onClick={action('clicked')} disabled>
+      Disabled ${compoName}
+    </${compoName}>
+  ));
   export default { title: '${compoName}', compo: ${compoName}, }; 
   const Template = (args) => <${compoName} {...args} />; 
   export const Basic = Template.bind({}); 
@@ -360,11 +449,9 @@ describe('${compoName}', () => {
         compoReadmeTemplate,
         );
     };
-  
 
 
 // Create the compo folder and files
-
 compomerci(
   compoName,
   compoStyle,
@@ -375,7 +462,26 @@ compomerci(
 );
 
 
-    console.log(chalk.bgGreenBright('All done!'));
     console.log(chalk.yellow(`${compoType} ${compoName} created successfully!`));
     console.log(chalk.blue(`${compoType} saved to ${savePath}${compoName}`));
-    console.log(chalk.redBright('Happy'), chalk.greenBright('Hacking!'));
+   // Ask the user if they want to create another component
+   const { continueCreating } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'continueCreating',
+      message: 'Do you want to create another component?',
+    },
+  ]);
+
+  createAnotherComponent = continueCreating;
+  if (!createAnotherComponent) {
+    console.log(chalk.bgYellowBright('All done!'));
+    console.log(chalk.bgRedBright('Happy'), chalk.bgGreenBright('Hacking!'));
+
+    break;
+  }
+}
+};
+
+// Execute the main function
+main();
