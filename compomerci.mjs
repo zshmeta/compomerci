@@ -278,35 +278,43 @@ if (story === blue('Yes')) {
   const compoStory = `
   import React from 'react'; 
   import ${compoName} from './${compoName}'; 
-  // components/atoms/${compoName}/index.stories.js
-  import React from 'react';
+  // ./${compoPath}/${compoName}.stories.js
   import { action } from '@storybook/addon-actions';
   import { storiesOf } from '@storybook/react';
-  import { ${compoName} } from '../..';
 
   storiesOf('atoms/${compoName}', module)
     .add('default', () => (
-      <${compoName} onClick={action('clicked')}>
+      // Add desired action (onClick, onHover, etc) to the ${compoName} component
+      <${compoName} }>
       Default
     </${compoName}>
   ))
   .add('outlined primary', () => (
-      <${compoName} variant="outlined" color="primary" onClick={action('clicked')}>
+      <${compoName} variant="outlined" color="primary" 
+      //   onClick={action('clicked')
+      //   onHover={action('hovered')}
+    }>
       Outline Primary
     </${compoName}>
   ))
   .add('contained secondary', () => (
-      <${compoName} variant="contained" color="secondary" onClick={action('clicked')}>
+      <${compoName} variant="contained" color="secondary" 
+      //   onClick={action('clicked')
+      //   onHover={action('hovered')}
+    }>
       Contained Secondary
     </${compoName}>
   ))
   .add('circle ${compoName}', () => (
-      <${compoName} variant="fab" color="primary" aria-label="Add" onClick={action('clicked')}>
+      <${compoName} variant="fab" color="primary" aria-label="Add" 
+    //   onClick={action('clicked')
+    //   onHover={action('hovered')}
+    }>
       CB
     </${compoName}>
   ))
   .add('disabled ${compoName}', () => (
-      <${compoName} variant="contained" color="primary" onClick={action('clicked')} disabled>
+      <${compoName} variant="contained" color="primary" } disabled>
       Disabled ${compoName}
     </${compoName}>
   ));
