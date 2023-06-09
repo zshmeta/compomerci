@@ -84,6 +84,7 @@ We take the positive now that it's done i will host it on github action so i can
  On retient le positif maintenant que c'est fait je vais hoster sa sur github action pour pouvoir l'appelez quand je veux ou je veux
 
 
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=zshmeta&repo=compomerci)](https://github.com/zshmeta/compomerci)
 
 
 /*
